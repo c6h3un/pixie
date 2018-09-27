@@ -10,3 +10,13 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# for Mac OS
+.DS_Store
+
+# Project
+/bin/
+/.gopath/
+/vendor/
+/test/tests.*
+/test/coverage.*
