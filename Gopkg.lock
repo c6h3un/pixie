@@ -17,6 +17,12 @@
   revision = "2efee857e7cfd4f3d0138cc3cbb1b4966962b93a"
 
 [[projects]]
+  name = "github.com/cloverstd/tcping"
+  packages = ["ping"]
+  revision = "d4ccfbf172694c9f3e4bb2ea5ecd13278f04eede"
+  version = "v0.1.1"
+
+[[projects]]
   name = "github.com/heptio/workgroup"
   packages = ["."]
   revision = "905fccf41a08323fdad6a1bd277290fdc54d92c3"
@@ -58,6 +64,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "326523923b4c91af7779fe820a8848dd6b96b7523003bc463185cf8be85b5c71"
+  inputs-digest = "0b67b8f7e116690e14dfcf13bb91d80da7207c705ee67fbe6f544b4b470021b6"
   solver-name = "gps-cdcl"
   solver-version = 1

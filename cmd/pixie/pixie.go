@@ -22,6 +22,7 @@ import (
 	"github.com/heptio/workgroup"
 	"github.com/owensengoku/pixie/internal/duck"
 	"github.com/owensengoku/pixie/internal/httpsvc"
+	"github.com/owensengoku/pixie/internal/tcping"
 	"github.com/sirupsen/logrus"
 )
 
@@ -39,17 +40,34 @@ func main() {
 	serve.Flag("duck-address", "address the serve http endpoint will bind").Default("0.0.0.0").StringVar(&ducksvc.Addr)
 	serve.Flag("duck-port", "port the serve http endpoint will bind").Default("8000").IntVar(&ducksvc.Port)
 
+	ping := app.Command("ping", "ping for tcp or http(s)")
+
+	pingProto := ping.Flag("ping-protocol", "protocol for ping").Default("http").String()
+	pingAddr := ping.Flag("ping-address", "address of ping target").Default("127.0.0.1").String()
+	pingPort := ping.Flag("ping-port", "port of ping target").Default("8000").Int()
+	pingCounter := ping.Flag("ping-coutner", "repeat times for ping").Default("4").Int()
+	pingTimeout := ping.Flag("ping-timeout", "timeout of ping").Default("1s").Duration()
+	pingInterval := ping.Flag("ping-interval", "port of ping target").Default("1s").Duration()
+
 	args := os.Args[1:]
+	log.Infof("args: %v", args)
 	switch kingpin.MustParse(app.Parse(args)) {
 
 	case serve.FullCommand():
-		log.Infof("args: %v", args)
+
 		var g workgroup.Group
 
 		flag.Parse()
 
 		g.Add(ducksvc.Start)
 		g.Run()
+	case ping.FullCommand():
+		pingWorker, err := tcping.NewWorker(*pingProto, *pingAddr, *pingPort, *pingCounter, *pingTimeout, *pingInterval)
+		check(err)
+		pingWorker.FieldLogger = log.WithField("context", "tcping")
+
+		var stop <-chan struct{}
+		pingWorker.Start(stop)
 	default:
 		app.Usage(args)
 		os.Exit(2)

@@ -42,7 +42,7 @@ func registerHealthCheck(mux *http.ServeMux) {
 }
 
 func registerDuck(mux *http.ServeMux) {
-	mux.HandleFunc("/duck", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "quack")
 	})
