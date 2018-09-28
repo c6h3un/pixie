@@ -1,0 +1,5 @@
+/.git
+/.gopath
+/bin
+/vendor
+/test
