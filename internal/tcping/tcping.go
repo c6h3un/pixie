@@ -14,6 +14,27 @@ import (
 type Worker struct {
 	*ping.Target
 	logrus.FieldLogger
+	result chan string
+}
+
+type Arg struct {
+	Protocol string        `json:"pingProto"`
+	Host     string        `json:"pingAddr"`
+	Port     int           `json:"pingPort"`
+	Counter  int           `json:"pingCounter"`
+	Timeout  time.Duration `json:"pingTimeout"`
+	Interval time.Duration `json:"pingInterval"`
+}
+
+func Run(logger logrus.FieldLogger, arg *Arg) string {
+	worker, err := NewWorker(arg.Protocol, arg.Host, arg.Port, arg.Counter, arg.Timeout, arg.Interval)
+	if err != nil {
+		panic(err)
+	}
+	worker.FieldLogger = logger
+	var stop <-chan struct{}
+	worker.Start(stop)
+	return worker.Result()
 }
 
 func NewWorker(protocol, host string, port, counter int, timeout, intervel time.Duration) (*Worker, error) {
@@ -31,6 +52,7 @@ func NewWorker(protocol, host string, port, counter int, timeout, intervel time.
 			Counter:  counter,
 			Protocol: p,
 		},
+		result: make(chan string, 1),
 	}, nil
 }
 
@@ -66,7 +88,12 @@ func (w *Worker) Start(stop <-chan struct{}) (err error) {
 		defer cancel()
 		break
 	}
-
-	fmt.Println(pinger.Result())
+	r := pinger.Result().String()
+	fmt.Println(r)
+	w.result <- r
 	return nil
+}
+
+func (w *Worker) Result() string {
+	return <-w.result
 }
