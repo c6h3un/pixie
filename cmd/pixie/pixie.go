@@ -20,6 +20,7 @@ import (
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/heptio/workgroup"
+	"github.com/owensengoku/pixie/internal/do"
 	"github.com/owensengoku/pixie/internal/duck"
 	"github.com/owensengoku/pixie/internal/httpsvc"
 	"github.com/owensengoku/pixie/internal/tcping"
@@ -27,6 +28,7 @@ import (
 )
 
 func main() {
+	logrus.SetLevel(logrus.DebugLevel)
 	log := logrus.StandardLogger()
 	app := kingpin.New("pixie", "A simple application for test connection ability.")
 
@@ -37,8 +39,18 @@ func main() {
 			FieldLogger: log.WithField("context", "ducksvc"),
 		},
 	}
+
 	serve.Flag("duck-address", "address the serve http endpoint will bind").Default("0.0.0.0").StringVar(&ducksvc.Addr)
 	serve.Flag("duck-port", "port the serve http endpoint will bind").Default("8000").IntVar(&ducksvc.Port)
+
+	dosvc := do.Service{
+		Service: httpsvc.Service{
+			FieldLogger: log.WithField("context", "dosvc"),
+		},
+	}
+
+	serve.Flag("do-address", "address the serve http endpoint will bind").Default("0.0.0.0").StringVar(&dosvc.Addr)
+	serve.Flag("do-port", "port the serve http endpoint will bind").Default("8001").IntVar(&dosvc.Port)
 
 	ping := app.Command("ping", "ping for tcp or http(s)")
 
@@ -60,6 +72,7 @@ func main() {
 		flag.Parse()
 
 		g.Add(ducksvc.Start)
+		g.Add(dosvc.Start)
 		g.Run()
 	case ping.FullCommand():
 		pingWorker, err := tcping.NewWorker(*pingProto, *pingAddr, *pingPort, *pingCounter, *pingTimeout, *pingInterval)
