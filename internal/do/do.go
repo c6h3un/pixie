@@ -14,6 +14,7 @@ package do
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -49,7 +50,9 @@ func (svc *Service) Start(stop <-chan struct{}) error {
 func registerDo(mux *http.ServeMux, logger logrus.FieldLogger) {
 	mux.HandleFunc("/do", func(w http.ResponseWriter, r *http.Request) {
 		var a Action
-		err := json.NewDecoder(r.Body).Decode(&a)
+		s, _ := ioutil.ReadAll(r.Body)
+		//logger.Debugf("%s", s)
+		err := json.Unmarshal(s, &a)
 		if err != nil {
 			panic(err)
 		}
