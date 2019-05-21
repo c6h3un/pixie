@@ -89,7 +89,7 @@ func (w *Worker) Start(stop <-chan struct{}) (err error) {
 		break
 	}
 	r := pinger.Result().String()
-	fmt.Println(r)
+	//fmt.Println(r)
 	w.result <- r
 	return nil
 }
